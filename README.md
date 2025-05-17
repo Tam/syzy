@@ -1,6 +1,6 @@
 # Syzy
 
-A Fastify plugin for [brief description of what your plugin does].
+Opinionated, automated routing and templating for Fastify
 
 ## Installation
 
@@ -20,7 +20,12 @@ bun add syzy
 
 ## Usage
 
+Setup your fastify server with the recommended options (exported from Syzy) and 
+register the Syzy plugin.
+
 ```typescript
+// index.ts
+
 import Fastify from 'fastify';
 import SyzyPlugin, { recommendedOptions } from 'syzy';
 
@@ -34,13 +39,52 @@ await fastify.register(SyzyPlugin, {
 await fastify.listen({ port: 3000 });
 ```
 
+Add some routes to your `routes` directory (customisable in the plugin options).
+
+```
+├── src
+│   ├── index.ts            # Your fastify server code
+├── routes
+│   ├── page.twig           # Template for /
+│   ├── blog
+│   │   ├── page.twig       # Template for /blog
+│   │   ├── get.ts          # Load data for /blog
+│   │   ├── [id]            # Dynamic segment available in `request.params.id`
+│   │   │   ├── page.twig   # Template for /blog/123
+│   │   │   ├── get.ts      # Load data for /blog/123
+│   ├── login
+│   │   ├── page.twig       # Template for /login
+│   │   ├── post.ts         # Handle post method for /login
+```
+
+#### Twig
+
+Twig templates come with a default `@` namespace that points to the root of your 
+`routes` directory: `{% include '@/layout.twig' %}`.
+
+#### Method Handlers
+
+Method handlers should have a default exported `Route` object (see typescript 
+types).
+
+`hander` functions should return an object that will be available in the 
+template or return a response helper (`error(404)`, `redirect('/')`, etc.).
+
 ## API
 
 ### Plugin Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `prefix` | `string` | `'syzy'` | Prefix for the plugin's routes |
+| Option       | Type                    | Default      | Description                                          |
+|--------------|-------------------------|--------------|------------------------------------------------------|
+| `routesPath` | `string`                | `'./routes'` | Path to your routes directory                        |
+| `errorsPath` | `string`                | `'./'`       | Path to the error templates in your routes directory |
+| `templates`  | `TemplatePluginOptions` | `undefined`  | Twig template options                                |
+
+#### `TemplatePluginOptions`
+
+| Option       | Type                     | Default | Description     |
+|--------------|--------------------------|---------|-----------------|
+| `namespaces` | `Record<string, string>` | `{}`    | Twig namespaces |
 
 ## Development
 

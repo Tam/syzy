@@ -1,7 +1,7 @@
 {
   "name": "syzy",
   "version": "0.1.0",
-  "description": "A Fastify plugin",
+  "description": "Opinionated, automated routing and templating for Fastify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
