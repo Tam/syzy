@@ -1,7 +1,9 @@
 import { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
+import path from 'path';
 import fp from 'fastify-plugin';
 import { SyzyPluginOptions, SyzyState } from './types';
 import FastifyFormBody from '@fastify/formbody';
+import FastifyStatic from '@fastify/static';
 import TemplatesPlugin from '@/plugins/templates';
 import RoutesPlugin from '@/plugins/routes';
 
@@ -10,6 +12,7 @@ export { error, redirect } from '@/plugins/routes/response';
 const defaultOptions: SyzyPluginOptions = {
 	routesPath: './routes',
 	errorsPath: '',
+	publicPath: './public',
 };
 
 const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, options) => {
@@ -24,6 +27,12 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 	};
 
 	fastify.register(FastifyFormBody);
+
+	fastify.register(FastifyStatic, {
+		root: path.join(process.cwd(), options.publicPath ?? defaultOptions.publicPath!),
+		dotfiles: 'deny',
+		serveDotFiles: false,
+	});
 
 	fastify.register(TemplatesPlugin, {
 		...(options?.templates ?? {}),

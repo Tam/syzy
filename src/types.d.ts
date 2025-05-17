@@ -4,6 +4,7 @@ import SyzyResponse from '@/plugins/routes/response';
 export interface SyzyPluginOptions {
 	routesPath?: string;
 	errorsPath?: string;
+	publicPath?: string;
 	templates?: TemplatePluginOptions;
 }
 

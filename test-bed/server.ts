@@ -17,6 +17,7 @@ const fastify = Fastify({
 // Register our plugin
 await fastify.register(SyzyPlugin, {
 	routesPath: './test-bed/routes',
+	publicPath: './test-bed/public',
 });
 
 // Start the server

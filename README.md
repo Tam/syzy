@@ -78,6 +78,7 @@ template or return a response helper (`error(404)`, `redirect('/')`, etc.).
 |--------------|-------------------------|--------------|------------------------------------------------------|
 | `routesPath` | `string`                | `'./routes'` | Path to your routes directory                        |
 | `errorsPath` | `string`                | `'./'`       | Path to the error templates in your routes directory |
+| `publicPath` | `string`                | `'./public'` | Path to the public files directory                   |
 | `templates`  | `TemplatePluginOptions` | `undefined`  | Twig template options                                |
 
 #### `TemplatePluginOptions`
