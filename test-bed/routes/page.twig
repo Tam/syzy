@@ -1,0 +1,26 @@
+{% extends '@/layout.twig' %}
+
+{% block content %}
+	<h1>{{ greeting }}</h1>
+
+	<ul>
+		{% for item in items %}
+			<li><a href="/item/{{ item.id }}">{{ item.name }}</a></li>
+		{% endfor %}
+	</ul>
+
+	{% if success %}
+		<p>Form posted successfully!</p>
+	{% endif %}
+
+	<form method="post">
+		<label>
+			<span>A Number</span>
+			<input type="text" name="aNumber" value="{{ body.aNumber|default('not a number') }}">
+			{% if validationErrors.aNumber %}
+				<span>{{ validationErrors.aNumber }}</span>
+			{% endif %}
+		</label>
+		<button>Submit</button>
+	</form>
+{% endblock %}
