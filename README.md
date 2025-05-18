@@ -55,6 +55,8 @@ Add some routes to your `routes` directory (customisable in the plugin options).
 │   ├── login
 │   │   ├── page.twig       # Template for /login
 │   │   ├── post.ts         # Handle post method for /login
+├── public                  # Static files
+│   ├── styles.css
 ```
 
 #### Twig
@@ -74,12 +76,12 @@ template or return a response helper (`error(404)`, `redirect('/')`, etc.).
 
 ### Plugin Options
 
-| Option       | Type                    | Default      | Description                                          |
-|--------------|-------------------------|--------------|------------------------------------------------------|
-| `routesPath` | `string`                | `'./routes'` | Path to your routes directory                        |
-| `errorsPath` | `string`                | `'./'`       | Path to the error templates in your routes directory |
-| `publicPath` | `string`                | `'./public'` | Path to the public files directory                   |
-| `templates`  | `TemplatePluginOptions` | `undefined`  | Twig template options                                |
+| Option       | Type                    | Default      | Description                                                   |
+|--------------|-------------------------|--------------|---------------------------------------------------------------|
+| `routesPath` | `string`                | `'./routes'` | Path to your routes directory                                 |
+| `errorsPath` | `string`                | `'./'`       | Path to the error templates relative to your routes directory |
+| `publicPath` | `string`                | `'./public'` | Path to the public files directory                            |
+| `templates`  | `TemplatePluginOptions` | `undefined`  | Twig template options                                         |
 
 #### `TemplatePluginOptions`
 
@@ -104,7 +106,3 @@ bun test
 # Build the project
 bun run build
 ```
-
-## License
-
-MIT
