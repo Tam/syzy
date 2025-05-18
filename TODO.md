@@ -2,6 +2,7 @@
 
 ## Musts
 
+- [ ] Routes without a page file (i.e. just a GET that redirects)
 - [x] Static files
 - [ ] @fastify/helmet
 - [ ] Watch routes directory for changes (optional, behind config)
