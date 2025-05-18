@@ -1,5 +1,6 @@
 import { TemplatePluginOptions } from '@/plugins/templates';
 import SyzyResponse from '@/plugins/routes/response';
+import { FastifyHelmetOptions } from '@fastify/helmet';
 
 type HandlerResponse = void | { [key: string]: any } | SyzyResponse;
 type HandlerResponsePromise = Promise<HandlerResponse>;
@@ -11,6 +12,7 @@ export interface SyzyPluginOptions {
 	publicPath?: string;
 	templates?: TemplatePluginOptions;
 	globalHandler?: Handler;
+	helmet?: FastifyHelmetOptions;
 }
 
 export interface SyzyState {

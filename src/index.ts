@@ -4,8 +4,11 @@ import fp from 'fastify-plugin';
 import { SyzyPluginOptions, SyzyState } from './types';
 import FastifyFormBody from '@fastify/formbody';
 import FastifyStatic from '@fastify/static';
+import FastifyHelmet from '@fastify/helmet';
+import helmet from 'helmet';
 import TemplatesPlugin from '@/plugins/templates';
 import RoutesPlugin from '@/plugins/routes';
+import mergeHelmetConfig from '@/util/mergeHelmetConfig';
 
 export { error, redirect } from '@/plugins/routes/response';
 
@@ -28,6 +31,19 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 	};
 
 	fastify.register(FastifyFormBody);
+
+	const userHelmetOptions = options.helmet ?? {};
+	const useDefaultCSP = userHelmetOptions.contentSecurityPolicy === true
+		|| (userHelmetOptions.contentSecurityPolicy !== false
+		&& userHelmetOptions.contentSecurityPolicy?.useDefaults !== false);
+	const defaultDirectives = helmet.contentSecurityPolicy.getDefaultDirectives();
+	if (process.env.NODE_ENV === 'dev') delete defaultDirectives['upgrade-insecure-requests'];
+	fastify.register(FastifyHelmet, mergeHelmetConfig({
+		contentSecurityPolicy: useDefaultCSP ? {
+			useDefaults: false,
+			directives: defaultDirectives,
+		} : void 0,
+	}, userHelmetOptions));
 
 	fastify.register(FastifyStatic, {
 		root: path.join(process.cwd(), options.publicPath ?? defaultOptions.publicPath!),

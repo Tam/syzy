@@ -19,6 +19,13 @@ await fastify.register(SyzyPlugin, {
 	routesPath: './test-bed/routes',
 	publicPath: './test-bed/public',
 	globalHandler: () => ({ global: 'variable' }),
+	helmet: {
+		contentSecurityPolicy: {
+			directives: {
+				'script-src': ["xyzzy.xyzzy"],
+			},
+		}
+	},
 });
 
 // Start the server
