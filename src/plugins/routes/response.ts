@@ -20,7 +20,7 @@ export default class SyzyResponse {
 		this.message = message;
 	}
 
-	public handle (state: SyzyState, request: FastifyRequest, reply: FastifyReply) {
+	public async handle (state: SyzyState, request: FastifyRequest, reply: FastifyReply) {
 		switch (this.type) {
 			case ResponseType.Redirect:
 				if (!this.uri) throw new Error('Redirect response must have a URI');
@@ -30,10 +30,14 @@ export default class SyzyResponse {
 			case ResponseType.Error:
 				if (!this.status) throw new Error('Error response must have a status code');
 
-				// TODO: include global state
+				const globalContext = await state.globalHandler?.(request) ?? {};
+
 				return reply.code(this.status).viewAsync(
 					path.join(state.routesPath, state.errorsPath, `${this.status}.twig`),
-					{ message: this.message },
+					{
+						...globalContext,
+						message: this.message,
+					},
 				);
 		}
 	}

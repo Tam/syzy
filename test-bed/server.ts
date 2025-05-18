@@ -18,6 +18,7 @@ const fastify = Fastify({
 await fastify.register(SyzyPlugin, {
 	routesPath: './test-bed/routes',
 	publicPath: './test-bed/public',
+	globalHandler: () => ({ global: 'variable' }),
 });
 
 // Start the server

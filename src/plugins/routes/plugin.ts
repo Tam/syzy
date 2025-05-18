@@ -49,7 +49,10 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 				const getContext = await handlers.get?.handler?.(request) ?? {};
 				if (getContext instanceof SyzyResponse) return getContext.handle(options._state, request, reply);
 
+				const globalContext = await options._state.globalHandler?.(request) ?? {};
+
 				const context = {
+					...globalContext,
 					...getContext,
 					...actionContext,
 					validationErrors: request.validationError?.validation?.reduce((a: Record<string, string>, b: any) => {
@@ -70,27 +73,38 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 			const context = await handlers.get?.handler?.(request) ?? {};
 			if (context instanceof SyzyResponse) return context.handle(options._state, request, reply);
 
-			context.params = request.params;
+			const globalContext = await options._state.globalHandler?.(request) ?? {};
 
-			return reply.viewAsync(template, context);
+			return reply.viewAsync(template, {
+				...globalContext,
+				...context,
+				params: request.params,
+			});
 		});
 	}
 
-	app.setErrorHandler((error, request, reply) => {
+	app.setErrorHandler(async (error, request, reply) => {
 		if (error.statusCode) {
-			// TODO: include global state
+			const globalContext = await options._state.globalHandler?.(request) ?? {};
+
 			return reply.code(error.statusCode).viewAsync(
 				path.join(options._state.routesPath, options._state.errorsPath, `${error.statusCode}.twig`),
-				{ message: error.message },
+				{
+					...globalContext,
+					message: error.message,
+				},
 			);
 		}
 	});
 
-	app.setNotFoundHandler((request, reply) => {
-		// TODO: include global state
+	app.setNotFoundHandler(async (request, reply) => {
+		const globalContext = await options._state.globalHandler?.(request) ?? {};
+
 		return reply.code(404).viewAsync(
 			path.join(options._state.routesPath, options._state.errorsPath, '404.twig'),
-			{},
+			{
+				...globalContext,
+			},
 		);
 	});
 

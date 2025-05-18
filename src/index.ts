@@ -24,6 +24,7 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 	const syzyState: SyzyState = {
 		routesPath: options.routesPath ?? defaultOptions.routesPath!,
 		errorsPath: options.errorsPath ?? defaultOptions.errorsPath!,
+		globalHandler: options.globalHandler,
 	};
 
 	fastify.register(FastifyFormBody);
