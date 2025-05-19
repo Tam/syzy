@@ -3,6 +3,7 @@
 ## Musts
 
 - [x] Routes without a page file (i.e. just a GET that redirects)
+  - [ ] Should probably support all method types as stand-alone (so you can post to a page and redirect)
 - [x] Static files
 - [x] @fastify/helmet
 - [ ] Watch routes directory for changes (optional, behind config)
