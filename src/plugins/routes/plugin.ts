@@ -8,31 +8,47 @@ import SyzyResponse from '@/plugins/routes/response';
 const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 type Method = typeof methods[number];
 
-// TODO: handle routes without pages (i.e. a GET that immediately redirects, a logout route for example)
-
 export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 	const routesPath = options._state.routesPath.replace(/\/$/, '') + '/';
-	const pagePaths = fs.globSync(`${routesPath}**/page.twig`);
 
-	for (const template of pagePaths) {
-		const route = '/' + template
+	const routeOrigins = new Set<string>();
+
+	// Template routes
+	const templateFiles = fs.globSync(`${routesPath}**/page.twig`);
+	templateFiles.forEach(file => {
+		const p = file
 			.replace(routesPath, '')
 			.replace('page.twig', '')
-			.replace(/\/$/, '')
-			.replace(/\[(.*)]/g, ':$1');
+			.replace(/\/$/, '');
 
-		const handlersGlob = template
-			.replace(/\[/g, '\\[')
-			.replace('page.twig', `{${methods.join(',')}}.{ts,js}`);
+		routeOrigins.add(p);
+	});
 
-		const handlers = fs
-			.globSync(handlersGlob)
-			.reduce((a, b) => {
-				const name = path.basename(b).replace('.ts', '') as Method;
-				a[name] = require(path.join(process.cwd(), b)).default as Route;
+	// Get routes
+	const getFiles = fs.globSync(`${routesPath}**/get.{ts,js}`);
+	getFiles.forEach(file => {
+		const p = file
+			.replace(routesPath, '')
+			.replace(/get\.(ts|js)$/, '')
+			.replace(/\/$/, '');
 
-				return a;
-			}, {} as Record<Method, Route | undefined>);
+		routeOrigins.add(p);
+	});
+
+	for (const routePath of routeOrigins) {
+		const route = '/' + routePath.replace(/\[(.*)]/g, ':$1');
+		const dirPath = path.join(routesPath, routePath);
+
+		const templatePath = path.join(dirPath, 'page.twig');
+		const templateExists = fs.existsSync(templatePath);
+
+		const handlersGlob = path.join(dirPath, `{${methods.join(',')}}.{ts,js}`);
+		const handlers = fs.globSync(handlersGlob).reduce((a, b) => {
+			const name = path.basename(b).replace(/\.(ts|js)$/, '') as Method;
+            a[name] = require(path.join(process.cwd(), b)).default as Route;
+
+			return a;
+		}, {} as Record<Method, Route | undefined>);
 
 		for (const key of methods) {
 			if (key === 'get') continue;
@@ -65,7 +81,8 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 					params: request.params,
 				} as Record<string, any>;
 
-				return reply.viewAsync(template, context);
+				if (templateExists) return reply.viewAsync(templatePath, context);
+				else return reply.send(context) // TODO: render error page
 			});
 		}
 
@@ -75,11 +92,12 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 
 			const globalContext = await options._state.globalHandler?.(request) ?? {};
 
-			return reply.viewAsync(template, {
+			if (templateExists) return reply.viewAsync(templatePath, {
 				...globalContext,
 				...context,
 				params: request.params,
 			});
+			else return reply.send(context); // TODO: render error page
 		});
 	}
 
@@ -87,6 +105,7 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 		if (error.statusCode) {
 			const globalContext = await options._state.globalHandler?.(request) ?? {};
 
+			// TODO: built-in fallback error page
 			return reply.code(error.statusCode).viewAsync(
 				path.join(options._state.routesPath, options._state.errorsPath, `${error.statusCode}.twig`),
 				{

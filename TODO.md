@@ -2,7 +2,7 @@
 
 ## Musts
 
-- [ ] Routes without a page file (i.e. just a GET that redirects)
+- [x] Routes without a page file (i.e. just a GET that redirects)
 - [x] Static files
 - [x] @fastify/helmet
 - [ ] Watch routes directory for changes (optional, behind config)
@@ -10,6 +10,7 @@
 - [x] Error template files (i.e. 404.twig)
 - [x] Global context (w/ access to everything regular routes have access to, probably as a special handler in the plugin settings)
 - [ ] Hot reloading
+- [ ] JWT authentication
 
 ## Nice to have
 
