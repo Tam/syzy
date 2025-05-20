@@ -50,3 +50,11 @@ export function error (status: number, message?: string) {
 export function redirect (uri: string, status?: number) {
 	return new SyzyResponse(ResponseType.Redirect, uri, status);
 }
+
+redirect.temporary = (uri: string) => {
+	return redirect(uri, 307);
+};
+
+redirect.permanent = (uri: string) => {
+	return redirect(uri, 308);
+};

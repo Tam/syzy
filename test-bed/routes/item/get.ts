@@ -3,6 +3,6 @@ import { redirect } from '@/index';
 
 export default {
 	handler () {
-		return redirect('/');
+		return redirect.temporary('/');
 	},
 } as Route;
