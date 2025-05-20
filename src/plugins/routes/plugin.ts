@@ -9,61 +9,61 @@ const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 type Method = typeof methods[number];
 
 export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
-	const routesPath = options._state.routesPath.replace(/\/$/, '') + '/';
+	const basePath = options._state.routesPath.replace(/\/$/, '') + '/';
 
 	const routeOrigins = new Set<string>();
 
 	// Template routes
-	const templateFiles = fs.globSync(`${routesPath}**/page.twig`);
-	templateFiles.forEach(file => {
+	const templateFiles: Record<string, string> = {};
+	fs.globSync(`${basePath}**/page.twig`).forEach(file => {
 		const p = file
-			.replace(routesPath, '')
-			.replace('page.twig', '')
+			.replace(basePath, '')
+			.replace(/page\.twig$/, '')
 			.replace(/\/$/, '');
+
+		templateFiles[p] = file;
 
 		routeOrigins.add(p);
 	});
 
-	// Get routes
-	const getFiles = fs.globSync(`${routesPath}**/get.{ts,js}`);
-	getFiles.forEach(file => {
+	// Action routes
+	const actionFiles: Record<string, Partial<Record<Method, Route>>> = {};
+	fs.globSync(`${basePath}**/{${methods.join(',')}}.{ts,js}`).forEach(file => {
+		const name = path.basename(file);
+		const method = name.replace(/\.(ts|js)$/, '') as Method;
 		const p = file
-			.replace(routesPath, '')
-			.replace(/get\.(ts|js)$/, '')
+			.replace(basePath, '')
+			.replace(new RegExp(`${name}$`), '')
 			.replace(/\/$/, '');
+
+		if (!actionFiles[p]) actionFiles[p] = {};
+		actionFiles[p][method] = require(path.join(process.cwd(), file)).default as Route;
 
 		routeOrigins.add(p);
 	});
 
 	for (const routePath of routeOrigins) {
 		const route = '/' + routePath.replace(/\[(.*)]/g, ':$1');
-		const dirPath = path.join(routesPath, routePath);
+		const templatePath = templateFiles[routePath];
+		const actions = actionFiles[routePath] ?? {};
 
-		const templatePath = path.join(dirPath, 'page.twig');
-		const templateExists = fs.existsSync(templatePath);
-
-		const handlersGlob = path.join(dirPath, `{${methods.join(',')}}.{ts,js}`);
-		const handlers = fs.globSync(handlersGlob).reduce((a, b) => {
-			const name = path.basename(b).replace(/\.(ts|js)$/, '') as Method;
-            a[name] = require(path.join(process.cwd(), b)).default as Route;
-
-			return a;
-		}, {} as Record<Method, Route | undefined>);
-
-		for (const key of methods) {
-			if (key === 'get') continue;
+		for (const method in actions) {
+			const { options: handlerOpts, handler } = actionFiles[routePath][method as Method] as Route;
 
 			const opts = {
 				attachValidation: true,
-				...(handlers[key]?.options ?? {}),
-			} as RouteShorthandOptions;
+				...handlerOpts,
+			};
 
-			app[key](route, opts, async (request, reply) => {
-				const actionContext = await handlers[key]?.handler?.(request) ?? {};
+			app[method as Method](route, opts, async (request, reply) => {
+				const actionContext = await handler?.(request) ?? {};
 				if (actionContext instanceof SyzyResponse) return actionContext.handle(options._state, request, reply);
 
-				const getContext = await handlers.get?.handler?.(request) ?? {};
-				if (getContext instanceof SyzyResponse) return getContext.handle(options._state, request, reply);
+				let getContext = {};
+				if (method !== 'get') {
+					getContext = await actionFiles[routePath].get?.handler?.(request) ?? {};
+					if (getContext instanceof SyzyResponse) return getContext.handle(options._state, request, reply);
+				}
 
 				const globalContext = await options._state.globalHandler?.(request) ?? {};
 
@@ -79,26 +79,26 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 					}, {} as Record<string, string>),
 					body: request.body,
 					params: request.params,
-				} as Record<string, any>;
+				};
 
-				if (templateExists) return reply.viewAsync(templatePath, context);
+				if (templatePath) return reply.viewAsync(templatePath, context);
 				else return reply.send(context) // TODO: render error page
 			});
 		}
 
-		app.get(route, handlers?.get?.options ?? {}, async (request, reply) => {
-			const context = await handlers.get?.handler?.(request) ?? {};
-			if (context instanceof SyzyResponse) return context.handle(options._state, request, reply);
+		if (templatePath && !('get' in actions)) {
+			app.get(route, async (request, reply) => {
+				const globalContext = await options._state.globalHandler?.(request) ?? {};
 
-			const globalContext = await options._state.globalHandler?.(request) ?? {};
+				const context = {
+					...globalContext,
+					params: request.params,
+				};
 
-			if (templateExists) return reply.viewAsync(templatePath, {
-				...globalContext,
-				...context,
-				params: request.params,
+				if (templatePath) return reply.viewAsync(templatePath, context);
+				else return reply.send(context); // TODO: render error page
 			});
-			else return reply.send(context); // TODO: render error page
-		});
+		}
 	}
 
 	app.setErrorHandler(async (error, request, reply) => {
