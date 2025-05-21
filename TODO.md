@@ -21,3 +21,4 @@
 - [ ] Convert atom plugin to twig js
 - [ ] Static file cache-breaking (i.e. style.[hash].css)
 - [ ] "Dynamic" routes (i.e. `routes/contact/@form/page.twig` would only contain form code with the idea that it is dynamically included into the parent via HTMX or something, and would automatically redirect to the parent if accessed directly)
+- [ ] Twig `css` & `js` tags that will add a style/script tag to the body and automatically add the src/integrity/nonce to CSP

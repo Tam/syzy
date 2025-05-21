@@ -17,6 +17,7 @@ export interface SyzyPluginOptions {
 	globalHandler?: Handler;
 	helmet?: FastifyHelmetOptions;
 	headers?: Headers;
+	defaultCacheControl?: string;
 }
 
 export interface SyzyState {

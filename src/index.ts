@@ -2,6 +2,7 @@ import { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 import path from 'path';
 import fp from 'fastify-plugin';
 import { SyzyPluginOptions, SyzyState } from './types';
+import FastifySensible from '@fastify/sensible';
 import FastifyFormBody from '@fastify/formbody';
 import FastifyStatic from '@fastify/static';
 import FastifyHelmet from '@fastify/helmet';
@@ -16,6 +17,7 @@ const defaultOptions: SyzyPluginOptions = {
 	routesPath: './routes',
 	errorsPath: '',
 	publicPath: './public',
+	defaultCacheControl: 'private, max-age=60',
 };
 
 const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, options) => {
@@ -30,6 +32,7 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 		globalHandler: options.globalHandler,
 	};
 
+	fastify.register(FastifySensible);
 	fastify.register(FastifyFormBody);
 
 	const userHelmetOptions = options.helmet ?? {};
@@ -59,6 +62,7 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 	fastify.register(RoutesPlugin, {
 		_state: syzyState,
 		headers: options.headers ?? {},
+		defaultCacheControl: options.defaultCacheControl ?? defaultOptions.defaultCacheControl!,
 	});
 };
 
