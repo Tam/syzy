@@ -130,7 +130,6 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 			const globalContext = await options._state.globalHandler?.(request) ?? {};
 
 			const headers = {
-				'cache-control': options.defaultCacheControl,
 				...(options.headers ?? {}),
 				...('headers' in globalContext ? globalContext.headers as Headers : {}),
 			} as Headers;
@@ -161,17 +160,22 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 		const globalContext = await options._state.globalHandler?.(request) ?? {};
 
 		const headers = {
-			'cache-control': options.defaultCacheControl,
 			...(options.headers ?? {}),
 			...('headers' in globalContext ? globalContext.headers as Headers : {}),
 		} as Headers;
 
-		return reply.code(404).headers(headers).viewAsync(
-			path.join(options._state.routesPath, options._state.errorsPath, '404.twig'),
-			{
+		const resp = reply.code(404).headers(headers).preventCache();
+
+		const templatePath = path.join(options._state.routesPath, options._state.errorsPath, '404.twig');
+		if (fs.existsSync(templatePath)) {
+			return resp.viewAsync(templatePath, {
 				...globalContext,
-			},
-		);
+			});
+		}
+
+		return resp
+			.header('content-type', 'text/html')
+			.send(ERROR_PAGE(404, 'Page not found'));
 	});
 
 	done();
