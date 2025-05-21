@@ -2,13 +2,13 @@ import fp from 'fastify-plugin';
 import fs from 'fs';
 import path from 'path';
 import { Route, SyzyStateOptions } from '@/types';
-import { RouteShorthandOptions } from 'fastify/types/route';
 import SyzyResponse from '@/plugins/routes/response';
+import { Headers } from '@/types';
 
 const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 type Method = typeof methods[number];
 
-export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
+export default fp<SyzyStateOptions & { headers?: Headers }>(function RoutesPlugin (app, options, done) {
 	const basePath = options._state.routesPath.replace(/\/$/, '') + '/';
 
 	const routeOrigins = new Set<string>();
@@ -48,7 +48,7 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 		const actions = actionFiles[routePath] ?? {};
 
 		for (const method in actions) {
-			const { options: handlerOpts, handler } = actionFiles[routePath][method as Method] as Route;
+			const { options: handlerOpts, handler, headers: handlerHeaders } = actionFiles[routePath][method as Method] as Route;
 
 			const opts = {
 				attachValidation: true,
@@ -81,7 +81,16 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 					params: request.params,
 				};
 
-				if (templatePath) return reply.viewAsync(templatePath, context);
+				const headers = {
+					'cache-control': 'private, max-age=60',
+					...(options.headers ?? {}),
+					...(handlerHeaders ?? {}),
+					...('headers' in globalContext ? globalContext.headers as Headers : {}),
+					...('headers' in getContext ? getContext.headers as Headers : {}),
+					...('headers' in actionContext ? actionContext.headers : {}),
+				} as Headers;
+
+				if (templatePath) return reply.headers(headers).viewAsync(templatePath, context);
 				else return reply.send(context) // TODO: render error page
 			});
 		}
@@ -95,7 +104,13 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 					params: request.params,
 				};
 
-				if (templatePath) return reply.viewAsync(templatePath, context);
+				const headers = {
+					'cache-control': 'private, max-age=60',
+					...(options.headers ?? {}),
+					...('headers' in globalContext ? globalContext.headers as Headers : {}),
+				} as Headers;
+
+				if (templatePath) return reply.headers(headers).viewAsync(templatePath, context);
 				else return reply.send(context); // TODO: render error page
 			});
 		}
@@ -105,8 +120,14 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 		if (error.statusCode) {
 			const globalContext = await options._state.globalHandler?.(request) ?? {};
 
+			const headers = {
+				'cache-control': 'private, max-age=60',
+				...(options.headers ?? {}),
+				...('headers' in globalContext ? globalContext.headers as Headers : {}),
+			} as Headers;
+
 			// TODO: built-in fallback error page
-			return reply.code(error.statusCode).viewAsync(
+			return reply.code(error.statusCode).headers(headers).viewAsync(
 				path.join(options._state.routesPath, options._state.errorsPath, `${error.statusCode}.twig`),
 				{
 					...globalContext,
@@ -119,7 +140,13 @@ export default fp<SyzyStateOptions>(function RoutesPlugin (app, options, done) {
 	app.setNotFoundHandler(async (request, reply) => {
 		const globalContext = await options._state.globalHandler?.(request) ?? {};
 
-		return reply.code(404).viewAsync(
+		const headers = {
+				'cache-control': 'private, max-age=60',
+				...(options.headers ?? {}),
+				...('headers' in globalContext ? globalContext.headers as Headers : {}),
+			} as Headers;
+
+		return reply.code(404).headers(headers).viewAsync(
 			path.join(options._state.routesPath, options._state.errorsPath, '404.twig'),
 			{
 				...globalContext,

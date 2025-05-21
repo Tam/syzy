@@ -7,15 +7,31 @@
 		content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0"
 	>
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Document</title>
+	<title>{{ title|default('Test Bed') }}</title>
 	<link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body
+	hx-boost="true"
+	hx-ext="preload"
+	preload="mouseover"
+	preload-images="true"
+>
 {% block content %}{% endblock %}
 
 <details id="debug">
 	<summary>Debug</summary>
 	<pre><code>{{ _context|json_encode(2) }}</code></pre>
 </details>
+
+<script
+	src="https://unpkg.com/htmx.org@2.0.4"
+	integrity="sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc="
+	crossorigin="anonymous"
+></script>
+<script
+	src="https://unpkg.com/htmx-ext-preload@2.1.0"
+	integrity="sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060="
+	crossorigin="anonymous"
+></script>
 </body>
 </html>

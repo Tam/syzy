@@ -1,8 +1,11 @@
 import { TemplatePluginOptions } from '@/plugins/templates';
 import SyzyResponse from '@/plugins/routes/response';
 import { FastifyHelmetOptions } from '@fastify/helmet';
+import { RouteShorthandOptions } from 'fastify/types/route';
+import { HttpHeader } from 'fastify/types/utils';
 
-type HandlerResponse = void | { [key: string]: any } | SyzyResponse;
+type Headers = Partial<Record<HttpHeader, number | string | string[] | undefined>>;
+type HandlerResponse = void | { headers?: Headers, [key: string]: any } | SyzyResponse;
 type HandlerResponsePromise = Promise<HandlerResponse>;
 type Handler = (request: FastifyRequest) => HandlerResponse | HandlerResponsePromise;
 
@@ -13,6 +16,7 @@ export interface SyzyPluginOptions {
 	templates?: TemplatePluginOptions;
 	globalHandler?: Handler;
 	helmet?: FastifyHelmetOptions;
+	headers?: Headers;
 }
 
 export interface SyzyState {
@@ -27,5 +31,6 @@ export interface SyzyStateOptions {
 
 interface Route {
 	options?: RouteShorthandOptions,
+	headers?: Headers;
 	handler?: Handler;
 }

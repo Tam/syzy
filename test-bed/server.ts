@@ -22,9 +22,16 @@ await fastify.register(SyzyPlugin, {
 	helmet: {
 		contentSecurityPolicy: {
 			directives: {
-				'script-src': ["xyzzy.xyzzy"],
+				'script-src': [
+					'unpkg.com',
+					"'sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc='", // htmx
+					"'sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060='", // htmx-preload
+				],
 			},
 		}
+	},
+	headers: {
+		'x-default-header': 'hi',
 	},
 });
 

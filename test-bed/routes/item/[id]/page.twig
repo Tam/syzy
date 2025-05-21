@@ -1,5 +1,7 @@
 {% extends '@/layout.twig' %}
 
+{% set title = 'Item ' ~ params.id %}
+
 {% block content %}
 	<h1>Item {{ params.id }}</h1>
 	<a href="/">&larr; Back</a>

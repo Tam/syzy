@@ -58,6 +58,7 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 
 	fastify.register(RoutesPlugin, {
 		_state: syzyState,
+		headers: options.headers ?? {},
 	});
 };
 

@@ -1,6 +1,9 @@
 import { Route } from '@/types';
 
 export default {
+	headers: {
+		'x-test': 'hello',
+	},
 	handler (options) {
 		return {
 			greeting: 'Hello world!',
@@ -8,6 +11,9 @@ export default {
 				id: i,
 				name: `Item ${i}`,
 			})),
+			headers: {
+				'x-test-2': 'world',
+			},
 		};
 	}
 } as Route;
