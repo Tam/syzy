@@ -5,10 +5,6 @@ import { SyzyPluginOptionsWithDefaults } from '@/index';
 
 // TODO: twig extensions
 
-export interface TemplatePluginOptions {
-	namespaces?: Record<string, string>;
-}
-
 export default fp<SyzyPluginOptionsWithDefaults>(function TemplatesPlugin (app, options, done) {
 	const _twig = Twig.twig;
 	Twig.twig = (params) => {

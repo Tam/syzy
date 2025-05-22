@@ -1,4 +1,4 @@
-import { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
+import { FastifyServerOptions } from 'fastify';
 import path from 'path';
 import fp from 'fastify-plugin';
 import { SyzyPluginOptions } from './types';
@@ -26,7 +26,7 @@ export type SyzyPluginOptionsWithDefaults =
 	Omit<SyzyPluginOptions, RequiredOptionKeys>
 	& Required<Pick<SyzyPluginOptions, RequiredOptionKeys>>;
 
-const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, options) => {
+export default fp<SyzyPluginOptions>(function SyzyPlugin (fastify, options, done) {
 	const opts = {
 		...defaultOptions,
 		...options,
@@ -39,13 +39,14 @@ const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, option
 		root: path.join(process.cwd(), opts.publicPath),
 		dotfiles: 'deny',
 		serveDotFiles: false,
+		// TODO: any other settings we want?
 	});
 
 	fastify.register(TemplatesPlugin, opts);
 	fastify.register(RoutesPlugin, opts);
-};
 
-export default fp(SyzyPlugin, {
+	done();
+}, {
 	fastify: '5.x',
 	name: 'syzy',
 });

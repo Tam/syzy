@@ -59,6 +59,14 @@ export default fp<SyzyPluginOptionsWithDefaults>(function RoutesPlugin (app, opt
 			};
 
 			app[method as Method](route, opts, async (request, reply) => {
+				// TODO: I think it might be nicer to allow the user to access `reply` in their handler directly. That
+				//  way they have access to all the useful helpers (`.preventCache()` for example). They'd need to
+				//  return it so we have access to it. It'll mean they can end the request early so we'll need to
+				//  account for that. We'd also need a custom `.context({})` method so they can set the context they
+				//  want passed to the template. It'd also mean we can stop allowing headers to be passed in the context
+				//  and instead require users to use `.headers({})` on the reply. That means context can be exclusively
+				//  used for template data.
+
 				const actionContext = await handler?.(request) ?? {};
 				if (actionContext instanceof SyzyResponse) return actionContext.handle(reply);
 
@@ -87,6 +95,8 @@ export default fp<SyzyPluginOptionsWithDefaults>(function RoutesPlugin (app, opt
 					params: request.params,
 				};
 
+				delete context.headers;
+
 				const headers = {
 					'cache-control': options.defaultCacheControl,
 					...(options.headers ?? {}),
@@ -109,6 +119,8 @@ export default fp<SyzyPluginOptionsWithDefaults>(function RoutesPlugin (app, opt
 					...globalContext,
 					params: request.params,
 				};
+
+				delete context.headers;
 
 				const headers = {
 					'cache-control': options.defaultCacheControl,

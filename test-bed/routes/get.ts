@@ -4,7 +4,7 @@ export default {
 	headers: {
 		'x-test': 'hello',
 	},
-	handler (options) {
+	handler (request) {
 		return {
 			greeting: 'Hello world!',
 			items: Array.from({ length: 10 }, (_, i) => ({
