@@ -1,9 +1,8 @@
 import fp from 'fastify-plugin';
 import fs from 'fs';
 import path from 'path';
-import { Route } from '@/types';
+import { Route, Headers } from '@/types';
 import SyzyResponse from '@/plugins/routes/response';
-import { Headers } from '@/types';
 import { SyzyPluginOptionsWithDefaults } from '@/index';
 
 const IS_DEV = process.env.NODE_ENV === 'dev';

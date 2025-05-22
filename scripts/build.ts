@@ -1,11 +1,9 @@
 import { spawnSync } from 'child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { existsSync, mkdirSync, rmSync, copyFileSync } from 'fs';
 
 // Ensure dist directory exists
-if (!existsSync('dist')) {
-	mkdirSync('dist');
-}
+if (existsSync('dist')) rmSync('dist', { force: true, recursive: true });
+mkdirSync('dist');
 
 // Run TypeScript compiler
 console.log('Running TypeScript compiler...');
@@ -15,35 +13,8 @@ if (tscResult.status !== 0) {
 	process.exit(1);
 }
 
-// Create package.json for the dist directory
-// console.log('Creating package.json for dist...');
-// const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-// const distPkg = {
-// 	name: pkg.name,
-// 	version: pkg.version,
-// 	description: pkg.description,
-// 	main: './index.js',
-// 	types: './index.d.ts',
-// 	type: 'module',
-// 	exports: {
-// 		'.': {
-// 			require: './index.js',
-// 			types: './index.d.ts'
-// 		}
-// 	},
-// 	author: pkg.author,
-// 	license: pkg.license,
-// 	repository: pkg.repository,
-// 	keywords: pkg.keywords,
-// 	peerDependencies: pkg.peerDependencies,
-// 	dependencies: pkg.dependencies || {}
-// };
-//
-// writeFileSync('dist/package.json', JSON.stringify(distPkg, null, 2));
-//
-// // Copy README.md if it exists
-// if (existsSync('README.md')) {
-// 	copyFileSync('README.md', 'dist/README.md');
-// }
+// Copy types.d.ts
+console.log('Copying files...');
+copyFileSync('src/types.d.ts', 'dist/types.d.ts');
 
 console.log('Build completed successfully! ✨');
