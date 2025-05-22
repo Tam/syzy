@@ -20,17 +20,7 @@ export interface SyzyPluginOptions {
 	defaultCacheControl?: string;
 }
 
-export interface SyzyState {
-	routesPath: string;
-	errorsPath: string;
-	globalHandler?: Handler;
-}
-
-export interface SyzyStateOptions {
-	_state: SyzyState;
-}
-
-interface Route {
+export interface Route {
 	options?: RouteShorthandOptions,
 	headers?: Headers;
 	handler?: Handler;

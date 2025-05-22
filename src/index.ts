@@ -1,15 +1,14 @@
 import { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 import path from 'path';
 import fp from 'fastify-plugin';
-import { SyzyPluginOptions, SyzyState } from './types';
+import { SyzyPluginOptions } from './types';
 import FastifySensible from '@fastify/sensible';
 import FastifyFormBody from '@fastify/formbody';
 import FastifyStatic from '@fastify/static';
 import FastifyHelmet from '@fastify/helmet';
-import helmet from 'helmet';
 import TemplatesPlugin from '@/plugins/templates';
 import RoutesPlugin from '@/plugins/routes';
-import mergeHelmetConfig from '@/util/mergeHelmetConfig';
+import buildHelmetConfig from '@/util/buildHelmetConfig';
 
 export { error, redirect } from '@/plugins/routes/response';
 
@@ -18,52 +17,32 @@ const defaultOptions: SyzyPluginOptions = {
 	errorsPath: '',
 	publicPath: './public',
 	defaultCacheControl: 'private, max-age=60',
+	helmet: {},
 };
 
+type RequiredOptionKeys = keyof typeof defaultOptions;
+
+export type SyzyPluginOptionsWithDefaults =
+	Omit<SyzyPluginOptions, RequiredOptionKeys>
+	& Required<Pick<SyzyPluginOptions, RequiredOptionKeys>>;
+
 const SyzyPlugin: FastifyPluginAsync<SyzyPluginOptions> = async (fastify, options) => {
-	options = {
+	const opts = {
 		...defaultOptions,
 		...options,
-	};
-
-	const syzyState: SyzyState = {
-		routesPath: options.routesPath ?? defaultOptions.routesPath!,
-		errorsPath: options.errorsPath ?? defaultOptions.errorsPath!,
-		globalHandler: options.globalHandler,
-	};
+	} as SyzyPluginOptionsWithDefaults;
 
 	fastify.register(FastifySensible);
 	fastify.register(FastifyFormBody);
-
-	const userHelmetOptions = options.helmet ?? {};
-	const useDefaultCSP = userHelmetOptions.contentSecurityPolicy === true
-		|| (userHelmetOptions.contentSecurityPolicy !== false
-		&& userHelmetOptions.contentSecurityPolicy?.useDefaults !== false);
-	const defaultDirectives = helmet.contentSecurityPolicy.getDefaultDirectives();
-	if (process.env.NODE_ENV === 'dev') delete defaultDirectives['upgrade-insecure-requests'];
-	fastify.register(FastifyHelmet, mergeHelmetConfig({
-		contentSecurityPolicy: useDefaultCSP ? {
-			useDefaults: false,
-			directives: defaultDirectives,
-		} : void 0,
-	}, userHelmetOptions));
-
+	fastify.register(FastifyHelmet, buildHelmetConfig(opts));
 	fastify.register(FastifyStatic, {
-		root: path.join(process.cwd(), options.publicPath ?? defaultOptions.publicPath!),
+		root: path.join(process.cwd(), opts.publicPath),
 		dotfiles: 'deny',
 		serveDotFiles: false,
 	});
 
-	fastify.register(TemplatesPlugin, {
-		...(options?.templates ?? {}),
-		_state: syzyState,
-	});
-
-	fastify.register(RoutesPlugin, {
-		_state: syzyState,
-		headers: options.headers ?? {},
-		defaultCacheControl: options.defaultCacheControl ?? defaultOptions.defaultCacheControl!,
-	});
+	fastify.register(TemplatesPlugin, opts);
+	fastify.register(RoutesPlugin, opts);
 };
 
 export default fp(SyzyPlugin, {

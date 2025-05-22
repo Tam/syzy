@@ -1,5 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { SyzyState } from '@/types';
+import { FastifyReply } from 'fastify';
 import { HttpErrorCodesLoose } from '@fastify/sensible';
 
 export enum ResponseType {
@@ -22,7 +21,7 @@ export default class SyzyResponse {
 		this.message = message;
 	}
 
-	public async handle (state: SyzyState, request: FastifyRequest, reply: FastifyReply) {
+	public async handle (reply: FastifyReply) {
 		switch (this.type) {
 			case ResponseType.Redirect:
 				if (!this.uri) throw new Error('Redirect response must have a URI');

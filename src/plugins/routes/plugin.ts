@@ -1,22 +1,18 @@
 import fp from 'fastify-plugin';
 import fs from 'fs';
 import path from 'path';
-import { Route, SyzyStateOptions } from '@/types';
+import { Route } from '@/types';
 import SyzyResponse from '@/plugins/routes/response';
 import { Headers } from '@/types';
+import { SyzyPluginOptionsWithDefaults } from '@/index';
 
 const IS_DEV = process.env.NODE_ENV === 'dev';
 
 const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 type Method = typeof methods[number];
 
-interface RoutesPluginOptions extends SyzyStateOptions {
-	headers?: Headers;
-	defaultCacheControl?: string;
-}
-
-export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done) {
-	const basePath = options._state.routesPath.replace(/\/$/, '') + '/';
+export default fp<SyzyPluginOptionsWithDefaults>(function RoutesPlugin (app, options, done) {
+	const basePath = options.routesPath.replace(/\/$/, '') + '/';
 
 	const routeOrigins = new Set<string>();
 
@@ -64,16 +60,16 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 
 			app[method as Method](route, opts, async (request, reply) => {
 				const actionContext = await handler?.(request) ?? {};
-				if (actionContext instanceof SyzyResponse) return actionContext.handle(options._state, request, reply);
+				if (actionContext instanceof SyzyResponse) return actionContext.handle(reply);
 
 				let getContext = {};
 				if (method !== 'get') {
 					getContext = await actionFiles[routePath].get?.handler?.(request) ?? {};
-					if (getContext instanceof SyzyResponse) return getContext.handle(options._state, request, reply);
+					if (getContext instanceof SyzyResponse) return getContext.handle(reply);
 				}
 
-				const globalContext = await options._state.globalHandler?.(request) ?? {};
-				if (globalContext instanceof SyzyResponse) return globalContext.handle(options._state, request, reply);
+				const globalContext = await options.globalHandler?.(request) ?? {};
+				if (globalContext instanceof SyzyResponse) return globalContext.handle(reply);
 
 				if (!templatePath) return reply.notImplemented('No template found for this route');
 
@@ -106,8 +102,8 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 
 		if (templatePath && !('get' in actions)) {
 			app.get(route, async (request, reply) => {
-				const globalContext = await options._state.globalHandler?.(request) ?? {};
-				if (globalContext instanceof SyzyResponse) return globalContext.handle(options._state, request, reply);
+				const globalContext = await options.globalHandler?.(request) ?? {};
+				if (globalContext instanceof SyzyResponse) return globalContext.handle(reply);
 
 				const context = {
 					...globalContext,
@@ -127,7 +123,7 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 
 	app.setErrorHandler(async (error, request, reply) => {
 		if (error.statusCode) {
-			const globalContext = await options._state.globalHandler?.(request) ?? {};
+			const globalContext = await options.globalHandler?.(request) ?? {};
 
 			const headers = {
 				...(options.headers ?? {}),
@@ -138,7 +134,7 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 				.code(error.statusCode)
 				.headers(headers);
 
-			const templatePath = path.join(options._state.routesPath, options._state.errorsPath, `${error.statusCode}.twig`);
+			const templatePath = path.join(options.routesPath, options.errorsPath, `${error.statusCode}.twig`);
 			if (fs.existsSync(templatePath)) {
 				return resp.viewAsync(templatePath, {
 					...globalContext,
@@ -157,7 +153,7 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 	});
 
 	app.setNotFoundHandler(async (request, reply) => {
-		const globalContext = await options._state.globalHandler?.(request) ?? {};
+		const globalContext = await options.globalHandler?.(request) ?? {};
 
 		const headers = {
 			...(options.headers ?? {}),
@@ -166,7 +162,7 @@ export default fp<RoutesPluginOptions>(function RoutesPlugin (app, options, done
 
 		const resp = reply.code(404).headers(headers).preventCache();
 
-		const templatePath = path.join(options._state.routesPath, options._state.errorsPath, '404.twig');
+		const templatePath = path.join(options.routesPath, options.errorsPath, '404.twig');
 		if (fs.existsSync(templatePath)) {
 			return resp.viewAsync(templatePath, {
 				...globalContext,
