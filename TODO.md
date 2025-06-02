@@ -13,7 +13,7 @@
 - [ ] Hot reloading
 - [ ] JWT authentication
 - [ ] Static file cache-breaking (i.e. style.[hash].css)
-- [ ] "Dynamic" routes (i.e. `routes/contact/@form/page.twig` would only contain form code with the idea that it is dynamically included into the parent via HTMX or something, and would automatically redirect to the parent if accessed directly)
+- [ ] "Dynamic" routes (i.e. `routes/contact/@form/page.twig` would only contain form code with the idea that it is dynamically included into the parent via HTMX or something, and would automatically redirect to the parent if accessed directly) Can also be used for pagination or infinite scroll loading
 - [ ] Twig `css` & `js` tags that will add a style/script tag to the body and automatically add the src/integrity/nonce to CSP
 - [ ] Convert atom plugin to twig js
 
@@ -23,3 +23,4 @@
 - [ ] A debug bar (similar to Yii's debug bar)
 - [ ] Critical CSS
 - [ ] Generated docs via TypeDoc or something
+- [ ] An {% async %} block for streaming HTML ([see](https://lamplightdev.com/blog/2024/01/10/streaming-html-out-of-order-without-javascript/))
