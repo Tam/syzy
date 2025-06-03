@@ -24,3 +24,6 @@
 - [ ] Critical CSS
 - [ ] Generated docs via TypeDoc or something
 - [ ] An {% async %} block for streaming HTML ([see](https://lamplightdev.com/blog/2024/01/10/streaming-html-out-of-order-without-javascript/))
+
+## Ideas
+- [ ] "Modal" routes (i.e. `routes/items/?edit/page.twig` that will inject the contents of the page into the parent page at the end of the body if the matching query param (`?edit=123`) is found)
