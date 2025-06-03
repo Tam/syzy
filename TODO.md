@@ -14,6 +14,7 @@
 - [ ] JWT authentication
 - [ ] Static file cache-breaking (i.e. style.[hash].css)
 - [ ] "Dynamic" routes (i.e. `routes/contact/@form/page.twig` would only contain form code with the idea that it is dynamically included into the parent via HTMX or something, and would automatically redirect to the parent if accessed directly) Can also be used for pagination or infinite scroll loading
+  - [ ] Might also be nice to support `{% fragment 'name' %}` blocks that can be used in a similar way (so only the fragment is rendered on certain requests) that works similar to [template fragments](https://htmx.org/essays/template-fragments/)
 - [ ] Twig `css` & `js` tags that will add a style/script tag to the body and automatically add the src/integrity/nonce to CSP
 - [ ] Convert atom plugin to twig js
 
@@ -23,7 +24,7 @@
 - [ ] A debug bar (similar to Yii's debug bar)
 - [ ] Critical CSS
 - [ ] Generated docs via TypeDoc or something
-- [ ] An {% async %} block for streaming HTML ([see](https://lamplightdev.com/blog/2024/01/10/streaming-html-out-of-order-without-javascript/))
+- [ ] An `{% async %}` block for streaming HTML ([see](https://lamplightdev.com/blog/2024/01/10/streaming-html-out-of-order-without-javascript/))
 
 ## Ideas
 - [ ] "Modal" routes (i.e. `routes/items/?edit/page.twig` that will inject the contents of the page into the parent page at the end of the body if the matching query param (`?edit=123`) is found)
