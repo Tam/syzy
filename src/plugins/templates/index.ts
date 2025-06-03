@@ -1,11 +1,12 @@
+import './filters';
+import './tags';
 import fp from 'fastify-plugin';
 import FastifyView from '@fastify/view';
 import Twig from 'twig';
 import { SyzyPluginOptionsWithDefaults } from '@/index';
+import { attachJsContext, injectJsTags } from './tags/js';
 
-// TODO: twig extensions
-
-export default fp<SyzyPluginOptionsWithDefaults>(function TemplatesPlugin (app, options, done) {
+export default fp<SyzyPluginOptionsWithDefaults>(function TemplatesPlugin (fastify, options, done) {
 	const _twig = Twig.twig;
 	Twig.twig = (params) => {
 		return _twig({
@@ -21,26 +22,26 @@ export default fp<SyzyPluginOptionsWithDefaults>(function TemplatesPlugin (app, 
 		});
 	};
 
-	app.register(FastifyView, {
+	fastify.register(FastifyView, {
 		engine: {
 			twig: Twig,
 		},
 		viewExt: 'twig',
 	});
 
+	fastify.addHook('preHandler', (request, reply, done) => {
+		attachJsContext(reply);
+
+		done();
+	});
+
+	fastify.addHook('onSend', (request, reply, payload, done) => {
+		payload = injectJsTags(reply, payload as string);
+
+		done(null, payload);
+	});
+
 	done();
 });
 
-/**
- * JSON encode Twig filter
- *
- * Accepts an optional argument to specify the number of spaces to use for indentation.
- *
- * ```twig
- * {{ value|json_encode(4) }}
- * ```
- */
-Twig.extendFilter(
-	'json_encode',
-	(value, args) => JSON.stringify(value, null, parseInt((args as [string])?.[0] ?? null)),
-);
+

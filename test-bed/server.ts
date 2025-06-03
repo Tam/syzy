@@ -16,20 +16,21 @@ const fastify = Fastify({
 
 // Register our plugin
 await fastify.register(SyzyPlugin, {
-	routesPath: './test-bed/routes',
+	routesPath: './test-bed/app',
 	publicPath: './test-bed/public',
 	globalHandler: () => ({ global: 'variable' }),
-	helmet: {
-		contentSecurityPolicy: {
-			directives: {
-				'script-src': [
-					'unpkg.com',
-					"'sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc='", // htmx
-					"'sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060='", // htmx-preload
-				],
-			},
-		}
-	},
+	// helmet: {
+	// 	contentSecurityPolicy: {
+	// 		directives: {
+	// 			'script-src': [
+	//              // Added automatically by the `{% js %}` tag
+	// 				'unpkg.com',
+	// 				"'sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc='", // htmx
+	// 				"'sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060='", // htmx-preload
+	// 			],
+	// 		},
+	// 	}
+	// },
 	headers: {
 		'x-default-header': 'hi',
 	},

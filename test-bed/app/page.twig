@@ -24,3 +24,9 @@
 		<button>Submit</button>
 	</form>
 {% endblock %}
+
+{% js '/test.js' at head %}
+
+{% js at beginBody %}
+	console.log('hello');
+{% endjs %}

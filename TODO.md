@@ -13,9 +13,12 @@
 - [ ] Hot reloading
 - [ ] JWT authentication
 - [ ] Static file cache-breaking (i.e. style.[hash].css)
+  - [ ] It would be nice if this integrated with the `css`/`js` tags and inject the hash, based on last updated, automatically (and redirect to the real file correctly)
 - [ ] "Dynamic" routes (i.e. `routes/contact/@form/page.twig` would only contain form code with the idea that it is dynamically included into the parent via HTMX or something, and would automatically redirect to the parent if accessed directly)
 - [ ] Twig `css` & `js` tags that will add a style/script tag to the body and automatically add the src/integrity/nonce to CSP
 - [ ] Convert atom plugin to twig js
+- [ ] `middleware.ts` files that are run before all sibling and child routes in order of nearest first
+  - So `item/edit/middleware.ts` will run before `item/middleware.ts` for `item/edit/post.ts`
 
 ## Nice to have
 
@@ -23,3 +26,5 @@
 - [ ] A debug bar (similar to Yii's debug bar)
 - [ ] Critical CSS
 - [ ] Generated docs via TypeDoc or something
+- [ ] Show twig errors in browser, not just a white page and the error in the server log
+- [ ] Support twig import paths without the `.twig` extension (i.e. `{% extends '@/layout' %}`)

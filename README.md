@@ -39,12 +39,12 @@ await fastify.register(SyzyPlugin, {
 await fastify.listen({ port: 3000 });
 ```
 
-Add some routes to your `routes` directory (customisable in the plugin options).
+Add some routes to your `app` directory (customisable in the plugin options).
 
 ```
 ├── src
 │   ├── index.ts            # Your fastify server code
-├── routes
+├── app
 │   ├── page.twig           # Template for /
 │   ├── blog
 │   │   ├── page.twig       # Template for /blog
@@ -62,7 +62,7 @@ Add some routes to your `routes` directory (customisable in the plugin options).
 #### Twig
 
 Twig templates come with a default `@` namespace that points to the root of your 
-`routes` directory: `{% include '@/layout.twig' %}`.
+`app` directory: `{% include '@/layout.twig' %}`.
 
 #### Method Handlers
 
@@ -78,7 +78,7 @@ template or return a response helper (`error(404)`, `redirect('/')`, etc.).
 
 | Option       | Type                    | Default      | Description                                                   |
 |--------------|-------------------------|--------------|---------------------------------------------------------------|
-| `routesPath` | `string`                | `'./routes'` | Path to your routes directory                                 |
+| `routesPath` | `string`                | `'./app'`    | Path to your routes directory                                 |
 | `errorsPath` | `string`                | `'./'`       | Path to the error templates relative to your routes directory |
 | `publicPath` | `string`                | `'./public'` | Path to the public files directory                            |
 | `templates`  | `TemplatePluginOptions` | `undefined`  | Twig template options                                         |

@@ -23,15 +23,23 @@
 	<pre><code>{{ _context|json_encode(2) }}</code></pre>
 </details>
 
-<script
+{% js 'https://unpkg.com/htmx.org@2.0.4' with {
+	integrity: 'sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc=',
+	crossorigin: 'anonymous',
+} %}
+{% js 'https://unpkg.com/htmx-ext-preload@2.1.0' with {
+	integrity: 'sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060=',
+	crossorigin: 'anonymous',
+} %}
+{#<script
 	src="https://unpkg.com/htmx.org@2.0.4"
 	integrity="sha256-4gndpcgjVHnzFm3vx3UOHbzVpcGAi3eS/C5nM3aPtEc="
 	crossorigin="anonymous"
-></script>
-<script
+></script>#}
+{#<script
 	src="https://unpkg.com/htmx-ext-preload@2.1.0"
 	integrity="sha256-zR7P64Kxm86KxUpEUVj9tVZXcNhWfL62CVIBEYHJ060="
 	crossorigin="anonymous"
-></script>
+></script>#}
 </body>
 </html>

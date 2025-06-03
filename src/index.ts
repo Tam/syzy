@@ -13,7 +13,7 @@ import buildHelmetConfig from '@/util/buildHelmetConfig';
 export { error, redirect } from '@/plugins/routes/response';
 
 const defaultOptions: SyzyPluginOptions = {
-	routesPath: './routes',
+	routesPath: './app',
 	errorsPath: '',
 	publicPath: './public',
 	defaultCacheControl: 'private, max-age=60',
@@ -39,7 +39,11 @@ export default fp<SyzyPluginOptions>(function SyzyPlugin (fastify, options, done
 		root: path.join(process.cwd(), opts.publicPath),
 		dotfiles: 'deny',
 		serveDotFiles: false,
-		// TODO: any other settings we want?
+		cacheControl: process.env.NODE_ENV !== 'dev',
+		etag: true,
+		lastModified: true,
+		maxAge: '30d',
+		immutable: true,
 	});
 
 	fastify.register(TemplatesPlugin, opts);
