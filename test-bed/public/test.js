@@ -1,1 +1,1 @@
-console.log('test');
+console.log('Logged from public/test.js');
